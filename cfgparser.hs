@@ -15,7 +15,6 @@ data Transition = Transition
 } deriving (Show, Eq)
 
 -- where we store transitions
-data TransitionList = [Transition] -- where we store transitions
 transitionsList :: [Transition]
 transitionsList =
   [ Transition "q_0" "lambda" "S" "q_0" ["O", "F"]
@@ -43,13 +42,13 @@ data Automaton = Automaton
 
 outAutomaton :: Automaton 
 outAutomaton = Automaton 
-{
+    {
 	states = ["q_0", "q_f", "q_j"] -- yap ab if we're using a jail state
 	, symbols = ["just put the O in the bag bro", "pause", "ohio", "pluh", "rizz", "and", "skibidi", "H tuah", "toilet", "hawk"] -- add more 
 	, startState = "q_0"
 	, acceptStates = ["q_f"] -- q_j if we're using it 
 	 , transitions = buildTransitionMap transitionsList 
-}
+    }
 
 simulate :: Automaton -> [String] -> Bool 
 -- takes an automaton and input string(s)
@@ -60,7 +59,7 @@ simulate automaton input = simulateHelper automaton (startState automaton) input
 simulateHelper :: Automaton -> String -> [String] -> [String] -> Bool
 -- (automata) (current state) (current input) (current stack)
 simulateHelper automata currentState [] stack  -- empty input string
-	| null stack && currentState `elem` acceptStates automaton = True
+	| null stack && currentState `elem` acceptStates automata = True
 	| otherwise = False 	
 
 simulateHelper automata currentState input [] = False -- empty stack but still input - invalid
