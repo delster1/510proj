@@ -43,11 +43,11 @@ data Automaton = Automaton
 outAutomaton :: Automaton 
 outAutomaton = Automaton 
     {
-	states = ["q_0", "q_f", "q_j"] -- yap ab if we're using a jail state
-	, symbols = ["just put the O in the bag bro", "pause", "ohio", "pluh", "rizz", "and", "skibidi", "H tuah", "toilet", "hawk"] -- add more 
-	, startState = "q_0"
-	, acceptStates = ["q_f"] -- q_j if we're using it 
-	 , transitions = buildTransitionMap transitionsList 
+    states = ["q_0", "q_f", "q_j"] -- yap ab if we're using a jail state
+    , symbols = ["just put the O in the bag bro", "pause", "ohio", "pluh", "rizz", "and", "skibidi", "H tuah", "toilet", "hawk"] -- add more 
+    , startState = "q_0"
+    , acceptStates = ["q_f"] -- q_j if we're using it 
+    , transitions = buildTransitionMap transitionsList 
     }
 
 simulate :: Automaton -> [String] -> Bool 
@@ -59,31 +59,31 @@ simulate automaton input = simulateHelper automaton (startState automaton) input
 simulateHelper :: Automaton -> String -> [String] -> [String] -> Bool
 -- (automata) (current state) (current input) (current stack)
 simulateHelper automata currentState [] stack  -- empty input string
-	| null stack && currentState `elem` acceptStates automata = True
-	| otherwise = False 	
+    | null stack && currentState `elem` acceptStates automata = True
+    | otherwise = False
 
 simulateHelper automata currentState input [] = False -- empty stack but still input - invalid
 
 simulateHelper automaton currentState (x:xs) stack = 
-	case Map.lookup (currentState, x, stackTop) (transitions automaton) of
-		-- if a valid transition is found, apply it
-		Just (nextState, stackOps) ->
-			let newStack = applyStackOps stackOps (tail stack) in
-		    simulateHelper automaton nextState xs newStack
-		-- handle lambda transitions if available
-		Nothing -> tryLambdaTransitions automaton currentState (x:xs) stack
-  where
-    stackTop = if null stack then "" else head stack
+    case Map.lookup (currentState, x, stackTop) (transitions automaton) of
+        -- if a valid transition is found, apply it
+        Just (nextState, stackOps) ->
+            let newStack = applyStackOps stackOps (tail stack) in
+            simulateHelper automaton nextState xs newStack
+        -- handle lambda transitions if available
+        Nothing -> tryLambdaTransitions automaton currentState (x:xs) stack
+    where
+        stackTop = if null stack then "" else head stack
 
 tryLambdaTransitions :: Automaton -> String -> [String] -> [String] -> Bool
 tryLambdaTransitions automaton currentState input stack =
-  case Map.lookup (currentState, "lambda", stackTop) (transitions automaton) of
-    Just (nextState, stackOps) ->
-      let newStack = applyStackOps stackOps (tail stack) in
-      simulateHelper automaton nextState input newStack
-    Nothing -> False
-  where
-    stackTop = if null stack then "" else head stack
+    case Map.lookup (currentState, "lambda", stackTop) (transitions automaton) of
+        Just (nextState, stackOps) ->
+            let newStack = applyStackOps stackOps (tail stack) in
+            simulateHelper automaton nextState input newStack
+        Nothing -> False
+    where
+        stackTop = if null stack then "" else head stack
 
 -- helper to apply stack operations
 applyStackOps :: [String] -> [String] -> [String]
