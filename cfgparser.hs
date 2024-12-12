@@ -11,47 +11,49 @@ data Transition = Transition
   , inputSymbol :: String
   , stackTop :: String
   , toState :: String
-  , stackOps :: [String] 
+  , stackOps :: [[String]] -- all possible stackops that can be applied 
 } deriving (Show, Eq)
 
 -- where we store transitions
 transitionsList :: [Transition]
-transitionsList =
-  [ Transition "q_0" "lambda" "S" "q_0" ["O", "F"]
-  , Transition "q_0" "lambda" "S" "q_0" ["O", "C", "O", "F"]
-  , Transition "q_0" "just put the O in the bag bro" "F" "q_0" []
-  , Transition "q_0" "pause" "F" "q_0" []
-  , Transition "q_0" "and" "C" "q_0" []
-  , Transition "q_0" "lambda" "C" "q_0" []
-  , Transition "q_0" "lambda" "O" "q_0" ["DO"]
-  , Transition "q_0" "lambda" "O" "q_0" ["N"]
-  , Transition "q_0" "ohio" "O" "q_0" []
-  , Transition "q_0" "pluh" "O" "q_0" []
-  , Transition "q_0" "rizz" "O" "q_0" []
-  , Transition "q_0" "skibidi" "N" "q_0" ["T"]
-  , Transition "q_0" "H tuah" "N" "q_0" ["H"]
-  , Transition "q_0" "lambda" "N" "q_0" []
-  , Transition "q_0" "toilet" "T" "q_0" []
-  , Transition "q_0" "lambda" "T" "q_0" []
-  , Transition "q_0" "hawk" "H" "q_0" []
-  , Transition "q_0" "lambda" "H" "q_0" []
-  , Transition "q_0" "lambda" "D" "q_0" ["D", "ahh", "O"]
-  , Transition "q_0" "lambda" "D" "q_0" ["N", "ahh", "O"]
-  , Transition "q_0" "lambda" "D" "q_0" ["CD"]
-  , Transition "q_0" "lambda" "D" "q_0" ["DO"]
-  , Transition "q_0" "glaze" "D" "q_0" []
-  , Transition "q_0" "cooked" "D" "q_0" []
-  , Transition "q_0" "sus" "D" "q_0" []
-  , Transition "q_0" "mid" "D" "q_0" []
-  , Transition "q_0" "crashout" "D" "q_0" []
-  , Transition "q_0" "goated" "D" "q_0" []
-  ]
-
+transitionsList = [
+    Transition "q_0" "lambda" "S" "q_0" [["P", "F"]],
+	Transition "q_0" "lambda" "P" "q_0" [["O"], ["O","C","P"], ["lambda"]],
+	Transition "q_0" "lambda" "F" "q_0" [["just put the", "O", "in the bag bro"], ["pause"], ["lambda"]],
+	Transition "q_0" "lambda" "N" "q_0" [["skibidi","T"],["H", "tuah"]],
+	Transition "q_0" "lambda" "T" "q_0" [["toilet"], ["lambda"]],
+	Transition "q_0" "lambda" "H" "q_0" [["hawk"], ["lambda"]],
+	Transition "q_0" "lambda" "D" "q_0" [["D","O"], ["D", "ahh", "O"],["D","C"],["N"], ["N", "ahh", "O"],["lambda"], ["cooked"],["sus"],["mid"],["crashout"]],
+	Transition "q_0" "lambda" "O" "q_0" [["D","O"],["N"],["ohio"],["pluh"], ["rizz"], ["mewer"], ["edge"], ["mewing"], ["twin"], ["unc"]],
+	Transition "q_0" "lambda" "C" "q_0" [["and"]],
+	Transition "q_0" "ohio" "ohio" "q_0" [[]],
+	Transition "q_0" "hawk" "hawk" "q_0" [[]],
+	Transition "q_0" "tuah" "tuah" "q_0" [[]],
+	Transition "q_0" "ahh" "ahh" "q_0" [[]],
+	Transition "q_0" "and" "and" "q_0" [[]],
+	Transition "q_0" "skibidi" "skibidi" "q_0" [[]],
+	Transition "q_0" "toilet" "toilet" "q_0" [[]],
+	Transition "q_0" "just put the" "just put the" "q_0" [[]],
+	Transition "q_0" "in the bag bro" "in the bag bro" "q_0" [[]],
+	Transition "q_0" "unc" "unc" "q_0" [[]],
+	Transition "q_0" "crashout" "crashout" "q_0" [[]],
+	Transition "q_0" "cooked" "cooked" "q_0" [[]],
+	Transition "q_0" "sus" "sus" "q_0" [[]],
+	Transition "q_0" "mid" "mid" "q_0" [[]],
+	Transition "q_0" "rizz" "rizz" "q_0" [[]],
+	Transition "q_0" "mewer" "mewer" "q_0" [[]],
+	Transition "q_0" "mewing" "mewing" "q_0" [[]],
+	Transition "q_0" "edge" "edge" "q_0" [[]],
+	Transition "q_0" "twin" "twin" "q_0" [[]],
+	Transition "q_0" "pluh" "pluh" "q_0" [[]],
+	Transition "q_0" "pause" "pause" "q_0" [[]]
+	]
 
 -- turns transitions list into dictionary w/ key [state, symbol, stacktopo] val: [nextState, stack symbols]
-buildTransitionMap :: [Transition] -> Map.Map (String, String, String) (String, [String])
+buildTransitionMap :: [Transition] -> Map.Map (String, String, String) (String, [[String]])
 buildTransitionMap ts = Map.fromList
   [ ((fromState t, inputSymbol t, stackTop t), (toState t, stackOps t)) | t <- ts ]
+
 
 -- automaton data type
 data Automaton = Automaton
@@ -59,7 +61,7 @@ data Automaton = Automaton
   , symbols :: [String]                -- input symbols, can be multi-word
   , startState :: String               -- Start state
   , acceptStates :: [String]           -- list of accepting states - do we need a jail state for invalid?
-  , transitions :: Map.Map (String, String, String) (String, [String]) -- dictionary of transitions (key: (state, input, stackTop), value: (nextState, stackOperations))
+  , transitions :: Map.Map (String, String, String) (String, [[String]]) -- dictionary of transitions (key: (state, input, stackTop), value: (nextState, stackOperations))
 } deriving (Show, Eq)
 
 
@@ -90,10 +92,7 @@ simulateHelper automaton currentState [] stack = do
 simulateHelper automaton currentState (x:xs) stack = do
   putStrLn $ "Current state: " ++ currentState ++ ", Input: " ++ x ++ ", Stack: " ++ show stack
   case Map.lookup (currentState, x, stackTop) (transitions automaton) of
-    Just (nextState, stackOps) -> do
-      let newStack = applyStackOps stackOps (tail stack)
-      putStrLn $ "Transitioning to state: " ++ nextState ++ ", New stack: " ++ show newStack
-      simulateHelper automaton nextState xs newStack
+    Just (nextState, stackOpsList) -> tryStackOps automaton nextState stackOpsList xs stack
     Nothing -> tryLambdaTransitions automaton currentState (x:xs) stack
   where
     stackTop = if null stack then "" else head stack
@@ -102,15 +101,27 @@ tryLambdaTransitions :: Automaton -> String -> [String] -> [String] -> IO Bool
 tryLambdaTransitions automaton currentState input stack = do
   putStrLn $ "Trying lambda transitions. State: " ++ currentState ++ ", Stack: " ++ show stack
   case Map.lookup (currentState, "lambda", stackTop) (transitions automaton) of
-    Just (nextState, stackOps) -> do
-      let newStack = applyStackOps stackOps (tail stack)
-      putStrLn $ "Lambda transition to state: " ++ nextState ++ ", New stack: " ++ show newStack
-      simulateHelper automaton nextState input newStack
+    Just (nextState, stackOpsList) -> tryStackOps automaton nextState stackOpsList input stack
     Nothing -> do
       putStrLn "No lambda transition available."
       return False
   where
     stackTop = if null stack then "" else head stack
+
+-- Helper to try all possible stack operations
+tryStackOps :: Automaton -> String -> [[String]] -> [String] -> [String] -> IO Bool
+tryStackOps automaton nextState [] remainingInput stack = do
+  putStrLn "No valid stack operations left to try."
+  return False
+tryStackOps automaton nextState (ops:remainingOps) remainingInput stack = do
+  let newStack = applyStackOps ops stack
+  putStrLn $ "Trying stack operations: " ++ show ops ++ ", New stack: " ++ show newStack
+  result <- simulateHelper automaton nextState remainingInput newStack
+  if result
+    then return True
+    else tryStackOps automaton nextState remainingOps remainingInput stack
+
 -- Helper to apply stack operations
 applyStackOps :: [String] -> [String] -> [String]
-applyStackOps ops stack = reverse ops ++ stack
+applyStackOps ops stack = (if null stack then [] else tail stack) ++ reverse ops
+
