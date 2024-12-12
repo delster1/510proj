@@ -111,42 +111,6 @@ tryLambdaTransitions automaton currentState input stack = do
       return False
   where
     stackTop = if null stack then "" else head stack
-
-simulate :: Automaton -> [String] -> Bool 
--- takes an automaton and input string(s)
-
-simulate automaton [] = False 
-simulate automaton input = simulateHelper automaton (startState automaton) input ["S"]
-
-simulateHelper :: Automaton -> String -> [String] -> [String] -> Bool
--- (automata) (current state) (current input) (current stack)
-simulateHelper automata currentState [] stack  -- empty input string
-    | null stack && currentState `elem` acceptStates automata = True
-    | otherwise = False
-
-simulateHelper automata currentState input [] = False -- empty stack but still input - invalid
-
-simulateHelper automaton currentState (x:xs) stack = 
-    case Map.lookup (currentState, x, stackTop) (transitions automaton) of
-        -- if a valid transition is found, apply it
-        Just (nextState, stackOps) ->
-            let newStack = applyStackOps stackOps (tail stack) in
-            simulateHelper automaton nextState xs newStack
-        -- handle lambda transitions if available
-        Nothing -> tryLambdaTransitions automaton currentState (x:xs) stack
-    where
-        stackTop = if null stack then "" else head stack
-
-tryLambdaTransitions :: Automaton -> String -> [String] -> [String] -> Bool
-tryLambdaTransitions automaton currentState input stack =
-    case Map.lookup (currentState, "lambda", stackTop) (transitions automaton) of
-        Just (nextState, stackOps) ->
-            let newStack = applyStackOps stackOps (tail stack) in
-            simulateHelper automaton nextState input newStack
-        Nothing -> False
-    where
-        stackTop = if null stack then "" else head stack
-
 -- Helper to apply stack operations
 applyStackOps :: [String] -> [String] -> [String]
 applyStackOps ops stack = reverse ops ++ stack
