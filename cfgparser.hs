@@ -15,15 +15,38 @@ data Transition = Transition
 } deriving (Show, Eq)
 
 -- where we store transitions
-data TransitionList = [Transition] -- where we store transitions
 transitionsList :: [Transition]
 transitionsList =
   [ Transition "q_0" "lambda" "S" "q_0" ["O", "F"]
   , Transition "q_0" "lambda" "S" "q_0" ["O", "C", "O", "F"]
   , Transition "q_0" "just put the O in the bag bro" "F" "q_0" []
   , Transition "q_0" "pause" "F" "q_0" []
-  , Transition "q_0" "lambda" "O" "q_0" ["DO", "N", "ohio"]
+  , Transition "q_0" "and" "C" "q_0" []
+  , Transition "q_0" "lambda" "C" "q_0" []
+  , Transition "q_0" "lambda" "O" "q_0" ["DO"]
+  , Transition "q_0" "lambda" "O" "q_0" ["N"]
+  , Transition "q_0" "ohio" "O" "q_0" []
+  , Transition "q_0" "pluh" "O" "q_0" []
+  , Transition "q_0" "rizz" "O" "q_0" []
+  , Transition "q_0" "skibidi" "N" "q_0" ["T"]
+  , Transition "q_0" "H tuah" "N" "q_0" ["H"]
+  , Transition "q_0" "lambda" "N" "q_0" []
+  , Transition "q_0" "toilet" "T" "q_0" []
+  , Transition "q_0" "lambda" "T" "q_0" []
+  , Transition "q_0" "hawk" "H" "q_0" []
+  , Transition "q_0" "lambda" "H" "q_0" []
+  , Transition "q_0" "lambda" "D" "q_0" ["D", "ahh", "O"]
+  , Transition "q_0" "lambda" "D" "q_0" ["N", "ahh", "O"]
+  , Transition "q_0" "lambda" "D" "q_0" ["CD"]
+  , Transition "q_0" "lambda" "D" "q_0" ["DO"]
+  , Transition "q_0" "glaze" "D" "q_0" []
+  , Transition "q_0" "cooked" "D" "q_0" []
+  , Transition "q_0" "sus" "D" "q_0" []
+  , Transition "q_0" "mid" "D" "q_0" []
+  , Transition "q_0" "crashout" "D" "q_0" []
+  , Transition "q_0" "goated" "D" "q_0" []
   ]
+
 
 -- turns transitions list into dictionary w/ key [state, symbol, stacktopo] val: [nextState, stack symbols]
 buildTransitionMap :: [Transition] -> Map.Map (String, String, String) (String, [String])
@@ -40,52 +63,55 @@ data Automaton = Automaton
 } deriving (Show, Eq)
 
 
+-- Example automaton
+outAutomaton :: Automaton
+outAutomaton = Automaton
+  { states = ["q_0", "q_f", "q_j"]
+  , symbols = ["just put the O in the bag bro", "pause", "ohio", "pluh", "rizz", "and", "skibidi", "H tuah", "toilet", "hawk"]
+  , startState = "q_0"
+  , acceptStates = ["q_f"]
+  , transitions = buildTransitionMap transitionsList
+  }
 
-outAutomaton :: Automaton 
-outAutomaton = Automaton 
-{
-	states = ["q_0", "q_f", "q_j"] -- yap ab if we're using a jail state
-	, symbols = ["just put the O in the bag bro", "pause", "ohio", "pluh", "rizz", "and", "skibidi", "H tuah", "toilet", "hawk"] -- add more 
-	, startState = "q_0"
-	, acceptStates = ["q_f"] -- q_j if we're using it 
-	 , transitions = buildTransitionMap transitionsList 
-}
-
-simulate :: Automaton -> [String] -> Bool 
--- takes an automaton and input string(s)
-
-simulate automaton [] = False 
+-- Simulate function with logging
+simulate :: Automaton -> [String] -> IO Bool
 simulate automaton input = simulateHelper automaton (startState automaton) input ["S"]
 
-simulateHelper :: Automaton -> String -> [String] -> [String] -> Bool
--- (automata) (current state) (current input) (current stack)
-simulateHelper automata currentState [] stack  -- empty input string
-	| null stack && currentState `elem` acceptStates automaton = True
-	| otherwise = False 	
-
-simulateHelper automata currentState input [] = False -- empty stack but still input - invalid
-
-simulateHelper automaton currentState (x:xs) stack = 
-	case Map.lookup (currentState, x, stackTop) (transitions automaton) of
-		-- if a valid transition is found, apply it
-		Just (nextState, stackOps) ->
-			let newStack = applyStackOps stackOps (tail stack) in
-		    simulateHelper automaton nextState xs newStack
-		-- handle lambda transitions if available
-		Nothing -> tryLambdaTransitions automaton currentState (x:xs) stack
+simulateHelper :: Automaton -> String -> [String] -> [String] -> IO Bool
+simulateHelper automaton currentState [] stack = do
+  putStrLn $ "Reached end of input. State: " ++ currentState ++ ", Stack: " ++ show stack
+  if null stack && currentState `elem` acceptStates automaton
+    then do
+      putStrLn "Accepted!"
+      return True
+    else do
+      putStrLn "Rejected: Input consumed but stack or state is invalid."
+      return False
+simulateHelper automaton currentState (x:xs) stack = do
+  putStrLn $ "Current state: " ++ currentState ++ ", Input: " ++ x ++ ", Stack: " ++ show stack
+  case Map.lookup (currentState, x, stackTop) (transitions automaton) of
+    Just (nextState, stackOps) -> do
+      let newStack = applyStackOps stackOps (tail stack)
+      putStrLn $ "Transitioning to state: " ++ nextState ++ ", New stack: " ++ show newStack
+      simulateHelper automaton nextState xs newStack
+    Nothing -> tryLambdaTransitions automaton currentState (x:xs) stack
   where
     stackTop = if null stack then "" else head stack
 
-tryLambdaTransitions :: Automaton -> String -> [String] -> [String] -> Bool
-tryLambdaTransitions automaton currentState input stack =
+tryLambdaTransitions :: Automaton -> String -> [String] -> [String] -> IO Bool
+tryLambdaTransitions automaton currentState input stack = do
+  putStrLn $ "Trying lambda transitions. State: " ++ currentState ++ ", Stack: " ++ show stack
   case Map.lookup (currentState, "lambda", stackTop) (transitions automaton) of
-    Just (nextState, stackOps) ->
-      let newStack = applyStackOps stackOps (tail stack) in
+    Just (nextState, stackOps) -> do
+      let newStack = applyStackOps stackOps (tail stack)
+      putStrLn $ "Lambda transition to state: " ++ nextState ++ ", New stack: " ++ show newStack
       simulateHelper automaton nextState input newStack
-    Nothing -> False
+    Nothing -> do
+      putStrLn "No lambda transition available."
+      return False
   where
     stackTop = if null stack then "" else head stack
 
--- helper to apply stack operations
+-- Helper to apply stack operations
 applyStackOps :: [String] -> [String] -> [String]
 applyStackOps ops stack = reverse ops ++ stack
