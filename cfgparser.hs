@@ -24,7 +24,7 @@ transitionsList = [
 	Transition "q_0" "lambda" "T" "q_0" [["toilet"], ["lambda"]],
 	Transition "q_0" "lambda" "H" "q_0" [["hawk"], ["lambda"]],
 
-	Transition "q_0" "lambda" "D" "q_0" [["lambda"], ["cooked", "D'"], ["sus", "D'"], ["mid", "D'"], ["crashout", "D'"], ["C", "P", "D'"], ["N", "ahh", "D'"], ["lambda", "D'"]],
+	Transition "q_0" "lambda" "D" "q_0" [["lambda"], ["cooked", "D'"], ["sus", "D'"], ["mid", "D'"], ["crashout", "D'"], ["C", "D'"], ["N", "ahh", "D'"], ["lambda", "D'"]],
     Transition "q_0" "lambda" "D'" "q_0" [["ahh", "D'"], []],
 	-- Transition "q_0" "lambda" "D" "q_0" [["lambda"], ["cooked"],["sus"],["mid"],["crashout"],["C","D"],["N"], ["N", "ahh"], ["D", "ahh"]],
 	-- Transition "q_0" "lambda" "D'" "q_0" [["lambda"],["ahh","D'"]]
