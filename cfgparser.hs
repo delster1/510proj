@@ -79,8 +79,12 @@ reverseList :: [String] -> [String]
 reverseList [] = []
 reverseList (x:xs) = reverseList xs ++ [x]
 -- Simulate function with logging
-simulate :: Automaton -> [String] -> IO Bool
-simulate automaton input = simulateHelper automaton (startState automaton) input ["S"]
+simulate :: Automaton -> [String] -> IO ()
+simulate automaton input = do 
+	result <- simulateHelper automaton (startState automaton) input ["S"]
+	if result 
+		then putStrLn "accept"
+		else putStrLn "reject"
 
 -- Helper to apply stack operations
 applyStackOps :: [String] -> [String] -> [String]
@@ -91,13 +95,13 @@ popStackOps ops stack = reverseList (tail (reverseList stack)) ++ reverseList op
 
 simulateHelper :: Automaton -> String -> [String] -> [String] -> IO Bool
 simulateHelper automaton currentState [] stack = do
-  putStrLn $ "Reached end of input. State: " ++ currentState ++ ", Stack: " ++ show stack
+  -- putStrLn $ "Reached end of input. State: " ++ currentState ++ ", Stack: " ++ show stack
   if stack == ["lambda"]-- && currentState `elem` acceptStates automaton
     then do
-      putStrLn "Accepted!"
+      -- putStrLn "Accepted!"
       return True
     else do
-      putStrLn "Rejected: Input consumed but stack or state is invalid."
+      -- putStrLn "Rejected: Input consumed but stack or state is invalid."
       return False
 
 simulateHelper automaton currentState (x:xs) stack = do
@@ -110,22 +114,22 @@ simulateHelper automaton currentState (x:xs) stack = do
 
 tryLambdaTransitions :: Automaton -> String -> [String] -> [String] -> IO Bool
 tryLambdaTransitions automaton currentState input stack = do
-  putStrLn $ "Trying lambda transitions. State: " ++ currentState ++ ", Stack: " ++ show stack
+  -- putStrLn $ "Trying lambda transitions. State: " ++ currentState ++ ", Stack: " ++ show stack
   case Map.lookup (currentState, "lambda", stackTop) (transitions automaton) of
     Just (nextState, stackOpsList) -> tryStackOps automaton nextState stackOpsList input stack
     Nothing -> do
-      putStrLn "No lambda transition available."
+      -- putStrLn "No lambda transition available."
       return False
   where
     stackTop = if null stack then "" else last stack -- Top of stack is the last element
 
 tryStackOps :: Automaton -> String -> [[String]] -> [String] -> [String] -> IO Bool
 tryStackOps automaton nextState [] remainingInput stack = do
-  putStrLn "No valid stack operations left to try."
+  -- putStrLn "No valid stack operations left to try."
   return False
 tryStackOps automaton nextState (ops:remainingOps) remainingInput stack = do
   let newStack = popStackOps ops stack
-  putStrLn $ "Trying stack operations: " ++ show ops ++ ", New stack: " ++ show newStack
+  -- putStrLn $ "Trying stack operations: " ++ show ops ++ ", New stack: " ++ show newStack
   result <- simulateHelper automaton nextState remainingInput newStack
   if result
     then return True
