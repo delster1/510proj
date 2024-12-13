@@ -105,7 +105,7 @@ simulateHelper automaton currentState [] stack = do
       return False
 
 simulateHelper automaton currentState (x:xs) stack = do
-  putStrLn $ "Current state: " ++ currentState ++ ", Input: " ++ x ++ ", Stack: " ++ show stack
+  -- putStrLn $ "Current state: " ++ currentState ++ ", Input: " ++ x ++ ", Stack: " ++ show stack
   case Map.lookup (currentState, x, stackTop) (transitions automaton) of
     Just (nextState, stackOpsList) -> tryStackOps automaton nextState stackOpsList xs stack
     Nothing -> tryLambdaTransitions automaton currentState (x:xs) stack
