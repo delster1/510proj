@@ -84,9 +84,9 @@ reverseList :: [String] -> [String]
 reverseList [] = []
 reverseList (x:xs) = reverseList xs ++ [x]
 -- Simulate function with logging
-simulate :: Automaton -> [String] -> IO ()
+simulate :: Automaton -> String -> IO ()
 simulate automaton input = do 
-	result <- simulateHelper automaton (startState automaton) input ["S"]
+	result <- simulateHelper automaton (startState automaton) (words (input ++ " lambda")) ["S"]
 	if result 
 		then putStrLn "accept"
 		else putStrLn "reject"
