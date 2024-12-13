@@ -24,7 +24,7 @@ transitionsList = [
 	Transition "q_0" "lambda" "T" "q_0" [["toilet"], ["lambda"]],
 	Transition "q_0" "lambda" "H" "q_0" [["hawk"], ["lambda"]],
 	Transition "q_0" "lambda" "D" "q_0" [["D","O"], ["D", "ahh", "O"],["D","C"],["N"], ["N", "ahh", "O"],["lambda"], ["cooked"],["sus"],["mid"],["crashout"]],
-	Transition "q_0" "lambda" "O" "q_0" [["D","O"],["N"],["ohio"],["pluh"], ["rizz"], ["mewer"], ["edge"], ["mewing"], ["twin"], ["unc"]],
+	Transition "q_0" "lambda" "O" "q_0" [["C","D","O"],["N"],["ohio"],["pluh"], ["rizz"], ["mewer"], ["edge"], ["mewing"], ["twin"], ["unc"]],
 	Transition "q_0" "lambda" "C" "q_0" [["and"]],
 	Transition "q_0" "ohio" "ohio" "q_0" [[]],
 	Transition "q_0" "hawk" "hawk" "q_0" [[]],
@@ -75,27 +75,38 @@ outAutomaton = Automaton
   , transitions = buildTransitionMap transitionsList
   }
 
+reverseList :: [String] -> [String]
+reverseList [] = []
+reverseList (x:xs) = reverseList xs ++ [x]
 -- Simulate function with logging
 simulate :: Automaton -> [String] -> IO Bool
 simulate automaton input = simulateHelper automaton (startState automaton) input ["S"]
 
+-- Helper to apply stack operations
+applyStackOps :: [String] -> [String] -> [String]
+applyStackOps ops stack = stack ++ ops  -- Append new operations at the end (stack grows down)
+
+popStackOps :: [String] -> [String] -> [String]
+popStackOps ops stack = reverseList (tail (reverseList stack)) ++ reverseList ops
+
 simulateHelper :: Automaton -> String -> [String] -> [String] -> IO Bool
 simulateHelper automaton currentState [] stack = do
   putStrLn $ "Reached end of input. State: " ++ currentState ++ ", Stack: " ++ show stack
-  if null stack && currentState `elem` acceptStates automaton
+  if stack == ["lambda"]-- && currentState `elem` acceptStates automaton
     then do
       putStrLn "Accepted!"
       return True
     else do
       putStrLn "Rejected: Input consumed but stack or state is invalid."
       return False
+
 simulateHelper automaton currentState (x:xs) stack = do
   putStrLn $ "Current state: " ++ currentState ++ ", Input: " ++ x ++ ", Stack: " ++ show stack
   case Map.lookup (currentState, x, stackTop) (transitions automaton) of
     Just (nextState, stackOpsList) -> tryStackOps automaton nextState stackOpsList xs stack
     Nothing -> tryLambdaTransitions automaton currentState (x:xs) stack
   where
-    stackTop = if null stack then "" else head stack
+    stackTop = if null stack then "" else last stack -- Top of stack is the last element
 
 tryLambdaTransitions :: Automaton -> String -> [String] -> [String] -> IO Bool
 tryLambdaTransitions automaton currentState input stack = do
@@ -106,22 +117,17 @@ tryLambdaTransitions automaton currentState input stack = do
       putStrLn "No lambda transition available."
       return False
   where
-    stackTop = if null stack then "" else head stack
+    stackTop = if null stack then "" else last stack -- Top of stack is the last element
 
--- Helper to try all possible stack operations
 tryStackOps :: Automaton -> String -> [[String]] -> [String] -> [String] -> IO Bool
 tryStackOps automaton nextState [] remainingInput stack = do
   putStrLn "No valid stack operations left to try."
   return False
 tryStackOps automaton nextState (ops:remainingOps) remainingInput stack = do
-  let newStack = applyStackOps ops stack
+  let newStack = popStackOps ops stack
   putStrLn $ "Trying stack operations: " ++ show ops ++ ", New stack: " ++ show newStack
   result <- simulateHelper automaton nextState remainingInput newStack
   if result
     then return True
     else tryStackOps automaton nextState remainingOps remainingInput stack
-
--- Helper to apply stack operations
-applyStackOps :: [String] -> [String] -> [String]
-applyStackOps ops stack = (if null stack then [] else tail stack) ++ reverse ops
 
