@@ -1,4 +1,4 @@
--- setting up basic types, in my head l
+-- setting up basic types, in my head 
 
 -- Data structure for the automaton with stack
 
@@ -17,6 +17,7 @@ data Transition = Transition
 -- where we store transitions
 transitionsList :: [Transition]
 transitionsList = [
+	Transition "q_s" "lambda" "" "q_0" [["S"]],
     Transition "q_0" "lambda" "S" "q_0" [["P", "F"]],
 	Transition "q_0" "lambda" "P" "q_0" [["O"], ["O","C","P"], ["lambda"]],
 	Transition "q_0" "lambda" "F" "q_0" [["just put the", "O", "in the bag bro"], ["pause"], ["lambda"]],
@@ -73,9 +74,9 @@ data Automaton = Automaton
 -- Example automaton
 outAutomaton :: Automaton
 outAutomaton = Automaton
-  { states = ["q_0", "q_f", "q_j"]
+  { states = ["q_0", "q_s"]
   , symbols = ["just put the O in the bag bro", "pause", "ohio", "pluh", "rizz", "and", "skibidi", "H tuah", "toilet", "hawk"]
-  , startState = "q_0"
+  , startState = "q_s"
   , acceptStates = ["q_f"]
   , transitions = buildTransitionMap transitionsList
   }
@@ -86,7 +87,7 @@ reverseList (x:xs) = reverseList xs ++ [x]
 -- Simulate function with logging
 simulate :: Automaton -> String -> IO ()
 simulate automaton input = do 
-	result <- simulateHelper automaton (startState automaton) (words (input ++ " lambda")) ["S"]
+	result <- simulateHelper automaton (startState automaton) (words (input ++ " lambda")) [""]
 	if result 
 		then putStrLn "accept"
 		else putStrLn "reject"
@@ -110,7 +111,7 @@ simulateHelper automaton currentState [] stack = do
       return False
 
 simulateHelper automaton currentState (x:xs) stack = do
-  -- putStrLn $ "Current state: " ++ currentState ++ ", Input: " ++ x ++ ", Stack: " ++ show stack
+  putStrLn $ "Current state: " ++ currentState ++ ", Input: " ++ x ++ ", Stack: " ++ show stack++ ", Next state: q_0"
   case Map.lookup (currentState, x, stackTop) (transitions automaton) of
     Just (nextState, stackOpsList) -> tryStackOps automaton nextState stackOpsList xs stack
     Nothing -> tryLambdaTransitions automaton currentState (x:xs) stack
@@ -140,3 +141,9 @@ tryStackOps automaton nextState (ops:remainingOps) remainingInput stack = do
     then return True
     else tryStackOps automaton nextState remainingOps remainingInput stack
 
+main :: IO ()
+main = do 
+	let a = outAutomaton 
+	putStrLn "Please enter a string to test"
+	n <- getLine
+	simulate a n
