@@ -1,6 +1,4 @@
--- setting up basic types, in my head l,
-import System.Timeout (timeout)
-import Control.Concurrent (threadDelay)
+-- setting up basic types, in my head l
 
 -- Data structure for the automaton with stack
 
@@ -25,8 +23,13 @@ transitionsList = [
 	Transition "q_0" "lambda" "N" "q_0" [["skibidi","T"],["H", "tuah"]],
 	Transition "q_0" "lambda" "T" "q_0" [["toilet"], ["lambda"]],
 	Transition "q_0" "lambda" "H" "q_0" [["hawk"], ["lambda"]],
-	Transition "q_0" "lambda" "D" "q_0" [["lambda"], ["cooked"],["sus"],["mid"],["crashout"],["C","P"] ,["D", "ahh","P"], ["D","ahh", "N"],["D"]],
-	Transition "q_0" "lambda" "O" "q_0" [["ohio"],["pluh"], ["rizz"], ["mewer"], ["edge"], ["mewing"], ["twin"], ["unc"],["D"],["C","O"],["N"]], 
+
+	Transition "q_0" "lambda" "D" "q_0" [["lambda"], ["cooked", "D'"], ["sus", "D'"], ["mid", "D'"], ["crashout", "D'"], ["C", "P", "D'"], ["N", "ahh", "D'"], ["lambda", "D'"]],
+    Transition "q_0" "lambda" "D'" "q_0" [["ahh", "D'"], []],
+	-- Transition "q_0" "lambda" "D" "q_0" [["lambda"], ["cooked"],["sus"],["mid"],["crashout"],["C","D"],["N"], ["N", "ahh"], ["D", "ahh"]],
+	-- Transition "q_0" "lambda" "D'" "q_0" [["lambda"],["ahh","D'"]]
+	
+	Transition "q_0" "lambda" "O" "q_0" [["ohio"],["pluh"], ["rizz"], ["mewer"], ["edge"], ["mewing"], ["twin"], ["unc"],["N"],["D","O"]],
 	Transition "q_0" "lambda" "C" "q_0" [["and"]],
 	Transition "q_0" "ohio" "ohio" "q_0" [[]],
 	Transition "q_0" "hawk" "hawk" "q_0" [[]],
@@ -87,16 +90,9 @@ simulate automaton input = do
 	if result 
 		then putStrLn "accept"
 		else putStrLn "reject"
-simulateWithTimeout :: Automaton -> [String] -> Int -> IO ()
-simulateWithTimeout automaton input timeoutMicroseconds = do
-  result <- timeout 100000 (simulate automaton input)
-  case result of
-    Just _  -> return ()  -- Simulation completed within the timeout
-    Nothing -> putStrLn "Simulation timed out and was terminated."
 
 -- Helper to apply stack operations
 applyStackOps :: [String] -> [String] -> [String]
-applyStackOps ["lambda"] stack = stack
 applyStackOps ops stack = stack ++ ops  -- Append new operations at the end (stack grows down)
 
 popStackOps :: [String] -> [String] -> [String]
@@ -107,13 +103,14 @@ simulateHelper automaton currentState [] stack = do
   -- putStrLn $ "Reached end of input. State: " ++ currentState ++ ", Stack: " ++ show stack
   if stack == ["lambda"]-- && currentState `elem` acceptStates automaton
     then do
-      putStrLn "Accepted!"
+      -- putStrLn "Accepted!"
       return True
     else do
-      putStrLn "Rejected: Input consumed but stack or state is invalid."
+      -- putStrLn "Rejected: Input consumed but stack or state is invalid."
       return False
+
 simulateHelper automaton currentState (x:xs) stack = do
-  putStrLn $ "Current state: " ++ currentState ++ ", Input: " ++ x ++ ", Stack: " ++ show stack
+  -- putStrLn $ "Current state: " ++ currentState ++ ", Input: " ++ x ++ ", Stack: " ++ show stack
   case Map.lookup (currentState, x, stackTop) (transitions automaton) of
     Just (nextState, stackOpsList) -> tryStackOps automaton nextState stackOpsList xs stack
     Nothing -> tryLambdaTransitions automaton currentState (x:xs) stack
@@ -122,22 +119,22 @@ simulateHelper automaton currentState (x:xs) stack = do
 
 tryLambdaTransitions :: Automaton -> String -> [String] -> [String] -> IO Bool
 tryLambdaTransitions automaton currentState input stack = do
-  putStrLn $ "Trying lambda transitions. State: " ++ currentState ++ ", Stack: " ++ show stack
+  -- putStrLn $ "Trying lambda transitions. State: " ++ currentState ++ ", Stack: " ++ show stack
   case Map.lookup (currentState, "lambda", stackTop) (transitions automaton) of
     Just (nextState, stackOpsList) -> tryStackOps automaton nextState stackOpsList input stack
     Nothing -> do
-      putStrLn "No lambda transition available."
+      -- putStrLn "No lambda transition available."
       return False
   where
     stackTop = if null stack then "" else last stack -- Top of stack is the last element
 
 tryStackOps :: Automaton -> String -> [[String]] -> [String] -> [String] -> IO Bool
 tryStackOps automaton nextState [] remainingInput stack = do
-  putStrLn "No valid stack operations left to try."
+  -- putStrLn "No valid stack operations left to try."
   return False
 tryStackOps automaton nextState (ops:remainingOps) remainingInput stack = do
   let newStack = popStackOps ops stack
-  putStrLn $ "Trying stack operations: " ++ show ops ++ ", New stack: " ++ show newStack
+  -- putStrLn $ "Trying stack operations: " ++ show ops ++ ", New stack: " ++ show newStack
   result <- simulateHelper automaton nextState remainingInput newStack
   if result
     then return True
