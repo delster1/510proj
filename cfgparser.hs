@@ -4,7 +4,11 @@
 
 import qualified Data.Map as Map
 import Data.Maybe (fromMaybe)
-
+joinSubstrings :: [String] -> [String] -- join "just put the" and "in the bag bro" together from ["just", "put", "the"] etc.
+joinSubstrings [] = []
+joinSubstrings ("just":"put":"the":xs) = "just put the" : joinSubstrings xs
+joinSubstrings ("in":"the":"bag":"bro":xs) = "in the bag bro" : joinSubstrings xs
+joinSubstrings (x:xs) = x : joinSubstrings xs 
 -- data type to create transitions
 data Transition = Transition
   { fromState :: String
@@ -19,24 +23,25 @@ transitionsList :: [Transition]
 transitionsList = [
 	Transition "q_s" "lambda" "" "q_0" [["S"]],
     Transition "q_0" "lambda" "S" "q_0" [["P", "F"]],
-	Transition "q_0" "lambda" "P" "q_0" [["O"], ["O","C","P"], ["lambda"]],
+	Transition "q_0" "lambda" "P" "q_0" [["lambda"],["O"], ["O","C","P"] ],
 	Transition "q_0" "lambda" "F" "q_0" [["just put the", "O", "in the bag bro"], ["pause"], ["lambda"]],
 	Transition "q_0" "lambda" "N" "q_0" [["skibidi","T"],["H", "tuah"]],
 	Transition "q_0" "lambda" "T" "q_0" [["toilet"], ["lambda"]],
 	Transition "q_0" "lambda" "H" "q_0" [["hawk"], ["lambda"]],
 
-	Transition "q_0" "lambda" "D" "q_0" [["lambda"], ["cooked", "D'"], ["sus", "D'"], ["mid", "D'"], ["crashout", "D'"], ["C", "D'"], ["N", "ahh", "D'"], ["lambda", "D'"]],
+	Transition "q_0" "lambda" "D" "q_0" [["lambda"], ["cooked", "D'"], ["glaze","D'"],["goated","D'"],["sus", "D'"], ["mid", "D'"], ["crashout", "D'"], ["C", "D'"], ["N", "ahh", "D'"],["lambda", "D'"]],
     Transition "q_0" "lambda" "D'" "q_0" [["ahh", "D'"], []],
 	-- Transition "q_0" "lambda" "D" "q_0" [["lambda"], ["cooked"],["sus"],["mid"],["crashout"],["C","D"],["N"], ["N", "ahh"], ["D", "ahh"]],
 	-- Transition "q_0" "lambda" "D'" "q_0" [["lambda"],["ahh","D'"]]
 	
-	Transition "q_0" "lambda" "O" "q_0" [["ohio"],["pluh"], ["rizz"], ["mewer"], ["edge"], ["mewing"], ["twin"], ["unc"],["N"],["D","O"]],
+	Transition "q_0" "lambda" "O" "q_0" [["ohio"],["pluh"], ["rizz"], ["mewer"],  ["mewing"], ["twin"], ["unc"],["N"],["D","O"]],
 	Transition "q_0" "lambda" "C" "q_0" [["and"]],
 	Transition "q_0" "ohio" "ohio" "q_0" [[]],
 	Transition "q_0" "hawk" "hawk" "q_0" [[]],
 	Transition "q_0" "tuah" "tuah" "q_0" [[]],
 	Transition "q_0" "ahh" "ahh" "q_0" [[]],
 	Transition "q_0" "and" "and" "q_0" [[]],
+	Transition "q_0" "goated" "goated" "q_0" [[]],
 	Transition "q_0" "skibidi" "skibidi" "q_0" [[]],
 	Transition "q_0" "toilet" "toilet" "q_0" [[]],
 	Transition "q_0" "just put the" "just put the" "q_0" [[]],
@@ -49,7 +54,6 @@ transitionsList = [
 	Transition "q_0" "rizz" "rizz" "q_0" [[]],
 	Transition "q_0" "mewer" "mewer" "q_0" [[]],
 	Transition "q_0" "mewing" "mewing" "q_0" [[]],
-	Transition "q_0" "edge" "edge" "q_0" [[]],
 	Transition "q_0" "twin" "twin" "q_0" [[]],
 	Transition "q_0" "pluh" "pluh" "q_0" [[]],
 	Transition "q_0" "pause" "pause" "q_0" [[]]
@@ -87,7 +91,7 @@ reverseList (x:xs) = reverseList xs ++ [x]
 -- Simulate function with logging
 simulate :: Automaton -> String -> IO ()
 simulate automaton input = do 
-	result <- simulateHelper automaton (startState automaton) (words (input ++ " lambda")) [""]
+	result <- simulateHelper automaton (startState automaton) (joinSubstrings (words (input))) [""]
 	if result 
 		then putStrLn "accept"
 		else putStrLn "reject"
@@ -102,7 +106,7 @@ popStackOps ops stack = reverseList (tail (reverseList stack)) ++ reverseList op
 simulateHelper :: Automaton -> String -> [String] -> [String] -> IO Bool
 simulateHelper automaton currentState [] stack = do
   -- putStrLn $ "Reached end of input. State: " ++ currentState ++ ", Stack: " ++ show stack
-  if stack == ["lambda"]-- && currentState `elem` acceptStates automaton
+  if stack == ["lambda"] || stack == [] -- && currentState `elem` acceptStates automaton
     then do
       -- putStrLn "Accepted!"
       return True

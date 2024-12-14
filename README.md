@@ -48,7 +48,7 @@ q_0 q_1
 q_0
 q_1
 S P F O C N D D' T H
-"just put the" "in the bag bro" "pause" "and" "ohio" "pluh" "rizz" "mewer" "edge" "mewing" "twin" "unc" "skibidi" "toilet" "hawk" "tuah" "ahh" 
+"just put the" "in the bag bro" "pause" "and" "ohio" "pluh" "rizz" "mewer" "dge" "mewing" "twin" "unc" "skibidi" "toilet" "hawk" "tuah" "ahh" 
 q_0 \ \ S q_1
 q_1 "just put the" "just put the" \ q_1
 q_1 "in the bag bro" "in the bag bro" \ q_1
@@ -58,7 +58,6 @@ q_1 "ohio" "ohio" \ q_1
 q_1 "pluh" "pluh" \ q_1
 q_1 "rizz" "rizz" \ q_1
 q_1 "mewer" "mewer" \ q_1
-q_1 "edge" "edge" \ q_1
 q_1 "mewing" "mewing" \ q_1
 q_1 "twin" "twin" \ q_1
 q_1 "unc" "unc" \ q_1
@@ -77,7 +76,6 @@ q_1 \ O "ohio" q_1
 q_1 \ O "pluh" q_1
 q_1 \ O "rizz" q_1
 q_1 \ O "mewer" q_1
-q_1 \ O "edge" q_1
 q_1 \ O "mewing" q_1
 q_1 \ O "twin" q_1
 q_1 \ O "unc" q_1
