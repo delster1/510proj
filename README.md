@@ -76,7 +76,6 @@ q_1 \ O "ohio" q_1
 q_1 \ O "pluh" q_1
 q_1 \ O "rizz" q_1
 q_1 \ O "mewer" q_1
-q_1 \ O "edge" q_1
 q_1 \ O "mewing" q_1
 q_1 \ O "twin" q_1
 q_1 \ O "unc" q_1
