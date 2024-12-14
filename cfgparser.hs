@@ -22,7 +22,7 @@ data Transition = Transition
 transitionsList :: [Transition]
 transitionsList = [
 	Transition "q_s" "lambda" "" "q_0" [["S"]],
-    Transition "q_0" "lambda" "S" "q_0" [["P", "F"]],
+    Transition "q_0" "lambda" "S" "q_0" [["F"],["P", "F"]],
 	Transition "q_0" "lambda" "P" "q_0" [["lambda"],["O"], ["O","C","P"] ],
 	Transition "q_0" "lambda" "F" "q_0" [["just put the", "O", "in the bag bro"], ["pause"], ["lambda"]],
 	Transition "q_0" "lambda" "N" "q_0" [["skibidi","T"],["H", "tuah"]],
